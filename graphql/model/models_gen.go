@@ -2,19 +2,85 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
+type Cat struct {
+	// postgres id for a cat
+	ID string `json:"id"`
+	// breed of the cat
+	Breed string `json:"breed"`
+	// color of the cat
+	Color string `json:"color"`
+	// gender of the cat
+	Gender Gender `json:"gender"`
+	// owner of the cat (relation to owner by owbers id)
+	Owner string `json:"owner"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type NewCat struct {
+	ID     string `json:"id"`
+	Breed  string `json:"breed"`
+	Color  string `json:"color"`
+	Gender Gender `json:"gender"`
+	Owner  string `json:"owner"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type NewOwner struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type Owner struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Cats     []*Cat `json:"cats"`
+}
+
+type Gender string
+
+const (
+	GenderFamale Gender = "famale"
+	GenderMale   Gender = "male"
+)
+
+var AllGender = []Gender{
+	GenderFamale,
+	GenderMale,
+}
+
+func (e Gender) IsValid() bool {
+	switch e {
+	case GenderFamale, GenderMale:
+		return true
+	}
+	return false
+}
+
+func (e Gender) String() string {
+	return string(e)
+}
+
+func (e *Gender) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Gender(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid GENDER", str)
+	}
+	return nil
+}
+
+func (e Gender) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

@@ -1,0 +1,19 @@
+input NewOwner {
+  id: ID!
+  name: String!
+  username: String!
+  password: String!
+}
+
+input NewCat {
+  id: ID!
+  breed: String!
+  color: String!
+  gender: GENDER!
+  owner: ID!
+}
+
+type Mutation {
+  createOwner(input: NewOwner!): Owner!
+  createCat(input: NewCat!): Cat!
+}

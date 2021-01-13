@@ -1,0 +1,6 @@
+type Query {
+  cat(id: ID!): Cat!
+  cats: [Cat!]!
+  owner(id: ID!): Owner!
+  owners: [Owner!]!
+}

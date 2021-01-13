@@ -1,0 +1,7 @@
+type Owner {
+  id: ID!
+  name: String!
+  username: String!
+  password: String!
+  cats: [Cat!]!
+}

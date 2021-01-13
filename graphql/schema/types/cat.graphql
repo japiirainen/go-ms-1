@@ -1,0 +1,27 @@
+enum GENDER {
+  famale
+  male
+}
+
+type Cat {
+  """
+  postgres id for a cat
+  """
+  id: ID!
+  """
+  breed of the cat
+  """
+  breed: String!
+  """
+  color of the cat
+  """
+  color: String!
+  """
+  gender of the cat
+  """
+  gender: GENDER!
+  """
+  owner of the cat (relation to owner by owbers id)
+  """
+  owner: ID!
+}
