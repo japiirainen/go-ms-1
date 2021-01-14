@@ -9,12 +9,17 @@ model:
   filename: graphql/model/models_gen.go
   package: model
 
+# resolver:
+#   layout: follow-schema
+#   # filename: ./graphql/resolvers/resolver.go
+#   dir: graphql/resolvers
+#   package: resolvers
+#   # filename_template: "{name}.resolvers.go"
 resolver:
-  layout: follow-schema
-  # filename: ./graphql/resolvers/resolver.go
+  filename: ./graphql/resolvers/resolver.go
   dir: graphql/resolvers
   package: resolvers
-  # filename_template: "{name}.resolvers.go"
+  filename_template: "{name}.resolvers.go"
 
 autobind:
   - "github.com/japiirainen/go-ms-1/graphql/model"
