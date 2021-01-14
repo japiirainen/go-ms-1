@@ -8,42 +8,6 @@ import (
 	"strconv"
 )
 
-type Cat struct {
-	// postgres id for a cat
-	ID string `json:"id"`
-	// breed of the cat
-	Breed string `json:"breed"`
-	// color of the cat
-	Color string `json:"color"`
-	// gender of the cat
-	Gender Gender `json:"gender"`
-	// owner of the cat (relation to owner by owbers id)
-	Owner string `json:"owner"`
-}
-
-type NewCat struct {
-	ID     string `json:"id"`
-	Breed  string `json:"breed"`
-	Color  string `json:"color"`
-	Gender Gender `json:"gender"`
-	Owner  string `json:"owner"`
-}
-
-type NewOwner struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type Owner struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Cats     []*Cat `json:"cats"`
-}
-
 type Gender string
 
 const (

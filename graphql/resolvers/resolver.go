@@ -4,6 +4,7 @@ import "github.com/japiirainen/go-ms-1/graphql/generated"
 
 //go:generate go run github.com/99designs/gqlgen
 
+// Resolver is main resolver
 type Resolver struct{}
 
 // Query returns generated.QueryResolver implementation.

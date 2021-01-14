@@ -11,7 +11,7 @@ import (
 	"github.com/japiirainen/go-ms-1/graphql/resolvers"
 )
 
-const defaultPort = "8080"
+const defaultPort = "5000"
 
 func main() {
 	port := os.Getenv("PORT")

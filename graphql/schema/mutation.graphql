@@ -2,7 +2,6 @@ input NewOwner {
   id: ID!
   name: String!
   username: String!
-  password: String!
 }
 
 input NewCat {

@@ -11,7 +11,7 @@ func (r *queryResolver) Cat(ctx context.Context, id string) (*model.Cat, error) 
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Cats(ctx context.Context) ([]*model.Cat, error) {
+func (r *queryResolver) Cats(ctx context.Context) ([]model.Cat, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

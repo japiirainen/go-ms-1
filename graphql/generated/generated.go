@@ -60,7 +60,6 @@ type ComplexityRoot struct {
 		Cats     func(childComplexity int) int
 		ID       func(childComplexity int) int
 		Name     func(childComplexity int) int
-		Password func(childComplexity int) int
 		Username func(childComplexity int) int
 	}
 
@@ -78,9 +77,9 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Cat(ctx context.Context, id string) (*model.Cat, error)
-	Cats(ctx context.Context) ([]*model.Cat, error)
+	Cats(ctx context.Context) ([]model.Cat, error)
 	Owner(ctx context.Context, id string) (*model.Owner, error)
-	Owners(ctx context.Context) ([]*model.Owner, error)
+	Owners(ctx context.Context) ([]model.Owner, error)
 }
 
 type executableSchema struct {
@@ -177,13 +176,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Owner.Name(childComplexity), true
-
-	case "Owner.password":
-		if e.complexity.Owner.Password == nil {
-			break
-		}
-
-		return e.complexity.Owner.Password(childComplexity), true
 
 	case "Owner.username":
 		if e.complexity.Owner.Username == nil {
@@ -298,7 +290,6 @@ var sources = []*ast.Source{
   id: ID!
   name: String!
   username: String!
-  password: String!
 }
 
 input NewCat {
@@ -375,8 +366,7 @@ type Cat {
   id: ID!
   name: String!
   username: String!
-  password: String!
-  cats: [Cat!]!
+  cats: [Cat]!
 }
 `, BuiltIn: false},
 }
@@ -529,9 +519,9 @@ func (ec *executionContext) _Cat_id(ctx context.Context, field graphql.Collected
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNID2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Cat_breed(ctx context.Context, field graphql.CollectedField, obj *model.Cat) (ret graphql.Marshaler) {
@@ -788,9 +778,9 @@ func (ec *executionContext) _Owner_id(ctx context.Context, field graphql.Collect
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNID2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Owner_name(ctx context.Context, field graphql.CollectedField, obj *model.Owner) (ret graphql.Marshaler) {
@@ -863,41 +853,6 @@ func (ec *executionContext) _Owner_username(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Owner_password(ctx context.Context, field graphql.CollectedField, obj *model.Owner) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Owner",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Password, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Owner_cats(ctx context.Context, field graphql.CollectedField, obj *model.Owner) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -930,7 +885,7 @@ func (ec *executionContext) _Owner_cats(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.([]*model.Cat)
 	fc.Result = res
-	return ec.marshalNCat2ᚕᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCatᚄ(ctx, field.Selections, res)
+	return ec.marshalNCat2ᚕᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCat(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_cat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1005,9 +960,9 @@ func (ec *executionContext) _Query_cats(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Cat)
+	res := resTmp.([]model.Cat)
 	fc.Result = res
-	return ec.marshalNCat2ᚕᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCatᚄ(ctx, field.Selections, res)
+	return ec.marshalNCat2ᚕgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCatᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_owner(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1082,9 +1037,9 @@ func (ec *executionContext) _Query_owners(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Owner)
+	res := resTmp.([]model.Owner)
 	fc.Result = res
-	return ec.marshalNOwner2ᚕᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐOwnerᚄ(ctx, field.Selections, res)
+	return ec.marshalNOwner2ᚕgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐOwnerᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2255,7 +2210,7 @@ func (ec *executionContext) unmarshalInputNewCat(ctx context.Context, obj interf
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			it.ID, err = ec.unmarshalNID2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2307,7 +2262,7 @@ func (ec *executionContext) unmarshalInputNewOwner(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			it.ID, err = ec.unmarshalNID2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2324,14 +2279,6 @@ func (ec *executionContext) unmarshalInputNewOwner(ctx context.Context, obj inte
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
 			it.Username, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "password":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
-			it.Password, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2455,11 +2402,6 @@ func (ec *executionContext) _Owner(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "username":
 			out.Values[i] = ec._Owner_username(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "password":
-			out.Values[i] = ec._Owner_password(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2829,7 +2771,7 @@ func (ec *executionContext) marshalNCat2githubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1
 	return ec._Cat(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCat2ᚕᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCatᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Cat) graphql.Marshaler {
+func (ec *executionContext) marshalNCat2ᚕgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCatᚄ(ctx context.Context, sel ast.SelectionSet, v []model.Cat) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2853,7 +2795,44 @@ func (ec *executionContext) marshalNCat2ᚕᚖgithubᚗcomᚋjapiirainenᚋgoᚑ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNCat2ᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCat(ctx, sel, v[i])
+			ret[i] = ec.marshalNCat2githubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCat(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNCat2ᚕᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCat(ctx context.Context, sel ast.SelectionSet, v []*model.Cat) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOCat2ᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCat(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2886,6 +2865,21 @@ func (ec *executionContext) marshalNGENDER2githubᚗcomᚋjapiirainenᚋgoᚑms�
 	return v
 }
 
+func (ec *executionContext) unmarshalNID2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2915,7 +2909,7 @@ func (ec *executionContext) marshalNOwner2githubᚗcomᚋjapiirainenᚋgoᚑms�
 	return ec._Owner(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNOwner2ᚕᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐOwnerᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Owner) graphql.Marshaler {
+func (ec *executionContext) marshalNOwner2ᚕgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐOwnerᚄ(ctx context.Context, sel ast.SelectionSet, v []model.Owner) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2939,7 +2933,7 @@ func (ec *executionContext) marshalNOwner2ᚕᚖgithubᚗcomᚋjapiirainenᚋgo�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNOwner2ᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐOwner(ctx, sel, v[i])
+			ret[i] = ec.marshalNOwner2githubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐOwner(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3228,6 +3222,13 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
+}
+
+func (ec *executionContext) marshalOCat2ᚖgithubᚗcomᚋjapiirainenᚋgoᚑmsᚑ1ᚋgraphqlᚋmodelᚐCat(ctx context.Context, sel ast.SelectionSet, v *model.Cat) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Cat(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
