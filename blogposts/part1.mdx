@@ -1,0 +1,187 @@
+# Microservices in go part 1. Intro
+
+I was seeing a lot of buzz around GO and how awesome it is for writing server side microservices, and eventually decided to give it a shot. I had previously built this small API that translates data provided by the largest liqour store in Finland called Alko to an Graphql API. I built the service quite rapidly and it became a huge mess. This app was built using typescript and apollo-server. I'm definitely saying that the reason that the app became a mess was because of typescript, but I wanted to build this app properly and thought that this would be a great time to give GO a shot!
+
+## Building a graphql API using go and gqlgen
+
+So I thought I would share my learnings from building this service in go. In this small series of blog posts we are going to build a small Graphql api that talks to a postgres database. Our api will be able to store cats and their owners. I didn't really know what this API should actually do so I decided to go with cats... Since you can't go wrong with cats!
+
+So let's get started shall we. I will not be going over on setting up you're go development environment but I will link a good recource for doing that. ![preparing your envionment for go development](https://www.gopherguides.com/courses/preparing-your-environment-for-go-development/modules/setting-up-mac-linux/)
+
+First lets create a new folder and initialize the project
+
+```
+mkdir go-ms-1 && cd go-ms-1 && go mod init <path to this folder from your $GOROOT>
+```
+
+There is a convention in the go community to store projects under the same sructure as in your external source code provider. So for example for me the ***go mod init*** command looks like this.
+
+```
+go mod init github.com/japiirainen/go-ms-1
+```
+
+## A quick word on gqlcen
+
+gql gen is a Graphql implementation for go that takes a schema first approach so you should be quite familiar if you have used apollo-server before. As I was doing research about other Graphql implementations in go I noticed that the most options take a code first approach. I quite like the schema first approach so I decided to go with gqlgen.
+
+After that we can bootstrap our gqlgen project using the following commands.
+
+Actually let's first download the package!
+
+```
+go get github.com/99designs/gqlgen
+```
+
+The we can bootstrap the project.
+
+```
+go run github.com/99designs/gqlgen init
+```
+
+This will generate quite a few files for you. Don't worry, we will go through all of these. But first lets write some code. The very first thing we should do is write our schema for the Graphql API. I said it's schema first afterall...
+
+I like to brake the schema into multiple clearly named files and not just stick everything into a single schema.graphql file. So lets do that. Go into the graph directory and create a folder called schema. This is where we will place all of our ***.graphql*** files.
+
+Our schema folder structure will look like this.
+```
+├── schema.graphql
+├── query.graphql
+├── mutation.graphql
+├── scalars.graphql
+├── types
+│   ├── cat.graphql
+│   ├── owner.graphql
+```
+
+First lets define the types of a cat and an owner
+
+***cat.graphql***
+```.graphql
+enum GENDER {
+  famale
+  male
+}
+
+type Cat {
+  id: ID!
+  breed: String!
+  color: String!
+  gender: GENDER!
+  owner: ID!
+}
+```
+
+***owner.graphql***
+```.graphql
+type Owner {
+  id: ID!
+  name: String!
+  username: String!
+  cats: [Cat]!
+}
+```
+
+Then lets define the rest of the schema
+
+***query.graphql***
+```.graphql
+type Query {
+  cat(id: ID!): Cat!
+  cats: [Cat!]!
+  owner(id: ID!): Owner!
+  owners: [Owner!]!
+}
+```
+
+***mutation.graphql***
+```.graphql
+input NewOwner {
+  id: ID!
+  name: String!
+  username: String!
+}
+
+input NewCat {
+  id: ID!
+  breed: String!
+  color: String!
+  gender: GENDER!
+  owner: ID!
+}
+
+type Mutation {
+  createOwner(input: NewOwner!): Owner!
+  createCat(input: NewCat!): Cat!
+}
+```
+
+***schema.graphql***
+
+```.graphql
+schema {
+  query: Query
+  mutation: Mutation
+}
+```
+
+A major feature in gqlgen is that it generates go structs and resolver functions for you based on your schema. So we need to tell gqlgen where our schema files are located. And you can also delete the generated ***schema.graphqls*** file. The way you change gqlgen configuration is by modifying the ***gqlgen.ymk*** file. You can copy everything from my example if you would like to follow along.
+
+***gqlgen.yml***
+```.yml
+schema:
+  - graphql/schema/**/*.graphql
+
+exec:
+  filename: graphql/generated/generated.go
+  package: generated
+
+model:
+  filename: graphql/model/models_gen.go
+  package: model
+
+resolver:
+  filename: ./graphql/resolvers/resolver.go
+  dir: graphql/resolvers
+  package: resolvers
+  filename_template: "{name}.resolvers.go"
+
+autobind:
+  - "github.com/japiirainen/go-ms-1/graphql/model" CHANGE THIS LINE !
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Float:
+    model:
+      - github.com/99designs/gqlgen/graphql.Float
+
+omit_slice_element_pointers: true
+```
+
+Next you should add this line to your ***resolver.go*** file.
+
+```
+//go:generate go run github.com/99designs/gqlgen
+```
+
+I also like to use a Makefile to not have to remember all the commands im running frequently. So lets do that.
+
+***Makefile***
+
+```
+gen:
+	- @echo "generating..."
+	- go generate -v ./graphql/...
+	- @echo "done generating! ✅"
+```
+
+Now you should be able to run ***make gen*** and gqlgen will generate resolvers and structs for you based on our schema.
