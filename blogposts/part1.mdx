@@ -14,7 +14,7 @@ First lets create a new folder and initialize the project
 mkdir go-ms-1 && cd go-ms-1 && go mod init <path to this folder from your $GOROOT>
 ```
 
-There is a convention in the go community to store projects under the same sructure as in your external source code provider. So for example for me the ***go mod init*** command looks like this.
+There is a convention in the go community to store projects under the same sructure as in your external source code provider. So for example for me the **_go mod init_** command looks like this.
 
 ```
 go mod init github.com/japiirainen/go-ms-1
@@ -40,9 +40,10 @@ go run github.com/99designs/gqlgen init
 
 This will generate quite a few files for you. Don't worry, we will go through all of these. But first lets write some code. The very first thing we should do is write our schema for the Graphql API. I said it's schema first afterall...
 
-I like to brake the schema into multiple clearly named files and not just stick everything into a single schema.graphql file. So lets do that. Go into the graph directory and create a folder called schema. This is where we will place all of our ***.graphql*** files.
+I like to brake the schema into multiple clearly named files and not just stick everything into a single schema.graphql file. So lets do that. Go into the graph directory and create a folder called schema. This is where we will place all of our **_.graphql_** files.
 
 Our schema folder structure will look like this.
+
 ```
 ├── schema.graphql
 ├── query.graphql
@@ -55,7 +56,8 @@ Our schema folder structure will look like this.
 
 First lets define the types of a cat and an owner
 
-***cat.graphql***
+**_cat.graphql_**
+
 ```.graphql
 enum GENDER {
   famale
@@ -71,7 +73,8 @@ type Cat {
 }
 ```
 
-***owner.graphql***
+**_owner.graphql_**
+
 ```.graphql
 type Owner {
   id: ID!
@@ -83,7 +86,8 @@ type Owner {
 
 Then lets define the rest of the schema
 
-***query.graphql***
+**_query.graphql_**
+
 ```.graphql
 type Query {
   cat(id: ID!): Cat!
@@ -93,7 +97,8 @@ type Query {
 }
 ```
 
-***mutation.graphql***
+**_mutation.graphql_**
+
 ```.graphql
 input NewOwner {
   id: ID!
@@ -115,7 +120,7 @@ type Mutation {
 }
 ```
 
-***schema.graphql***
+**_schema.graphql_**
 
 ```.graphql
 schema {
@@ -124,9 +129,10 @@ schema {
 }
 ```
 
-A major feature in gqlgen is that it generates go structs and resolver functions for you based on your schema. So we need to tell gqlgen where our schema files are located. And you can also delete the generated ***schema.graphqls*** file. The way you change gqlgen configuration is by modifying the ***gqlgen.ymk*** file. You can copy everything from my example if you would like to follow along.
+A major feature in gqlgen is that it generates go structs and resolver functions for you based on your schema. So we need to tell gqlgen where our schema files are located. And you can also delete the generated **_schema.graphqls_** file. The way you change gqlgen configuration is by modifying the **_gqlgen.ymk_** file. You can copy everything from my example if you would like to follow along.
 
-***gqlgen.yml***
+**_gqlgen.yml_**
+
 ```.yml
 schema:
   - graphql/schema/**/*.graphql
@@ -167,7 +173,7 @@ models:
 omit_slice_element_pointers: true
 ```
 
-Next you should add this line to your ***resolver.go*** file.
+Next you should add this line to your **_resolver.go_** file.
 
 ```
 //go:generate go run github.com/99designs/gqlgen
@@ -175,7 +181,7 @@ Next you should add this line to your ***resolver.go*** file.
 
 I also like to use a Makefile to not have to remember all the commands im running frequently. So lets do that.
 
-***Makefile***
+**_Makefile_**
 
 ```
 gen:
@@ -184,4 +190,71 @@ gen:
 	- @echo "done generating! ✅"
 ```
 
-Now you should be able to run ***make gen*** and gqlgen will generate resolvers and structs for you based on our schema.
+Now you should be able to run **_make gen_** and gqlgen will generate resolvers and structs for you based on our schema.
+
+So I like to modify the file structure slightly from the default that gqlgen gives you. You dont need to copy mine if you dont want to, but i'll show it show you can copy if that's somemthing you would like to do.
+
+**_My filestructure_**
+
+```
+├── server.go
+├── .env
+├── go.mod
+├── go.sum
+├── gqlgen.yml
+├── Makefile
+├── graphql
+│   ├── generated
+│   ├── model
+│   ├── resolvers
+│   ├── schema
+```
+
+This blog post is already getting lengthy and we haven't done anything very interesting but I guess thats how it is at the start of projects.
+Let's atleast get a simple resolver working before ending this part 1 of the project.
+
+**_graphql/resolvers/owner.resolvers.go_**
+
+```.go
+import (
+	"context"
+	"fmt"
+
+	"github.com/japiirainen/go-ms-1/graphql/model"
+)
+
+var owner *model.NewOwner
+
+func (r *queryResolver) Owner(ctx context.Context, id string) (*model.Owner, error) {
+	return &model.Owner{ID: 1, Name: "Jeppe Meikäläinen", Username: "greatUsername"}, nil
+}
+
+func (r *queryResolver) Owners(ctx context.Context) ([]model.Owner, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) CreateOwner(ctx context.Context, input model.NewOwner) (*model.Owner, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+```
+
+Now if we start the app by running **_go run --race server.g_** and navigating to localhost:8080 you should be able to run the following query!
+
+```.graphql
+{
+  owner(id: 1) {
+    name
+    id
+    cats {
+      id
+    }
+  }
+}
+```
+
+In the next part we will get to some more interesting things like actually storing data in postgres and hooking that up to our graphql resolvers.
+Hope this series helps you on getting starter with go and graphql.
+
+Links to the ![source code](https://github.com/japiirainen/go-ms-1)source code
+
+My website for more posts by ![yours truly](https://japiirainen.com)
