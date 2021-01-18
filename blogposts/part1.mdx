@@ -1,20 +1,31 @@
+---
+title: Building microservices in go part 1
+slug: 03-go-microservices-1
+author: Joona Piirainen
+date: 18-01-2021
+readTime: 5min
+mainImage: https://images.unsplash.com/photo-1503416997304-7f8bf166c121?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1778&q=80
+blogpost: true
+intro: Intro to Graphql and PostgreSQL in golang
+---
+
 # Microservices in go part 1. Intro
 
-I was seeing a lot of buzz around GO and how awesome it is for writing server side microservices, and eventually decided to give it a shot. I had previously built this small API that translates data provided by the largest liqour store in Finland called Alko to an Graphql API. I built the service quite rapidly and it became a huge mess. This app was built using typescript and apollo-server. I'm definitely saying that the reason that the app became a mess was because of typescript, but I wanted to build this app properly and thought that this would be a great time to give GO a shot!
+I was seeing a lot of buzz around GO and how awesome it is for writing server-side microservices, and eventually decided to give it a shot. I had previously built this small API that translates data provided by the largest liquor store in Finland called Alko to a Graphql API. I built the service quite rapidly and it became a huge mess. This app was built using typescript and apollo-server. I'm definitely saying that the reason that the app became a mess was because of typescript, but I wanted to build this app properly and thought that this would be a great time to give GO a shot!
 
 ## Building a graphql API using go and gqlgen
 
-So I thought I would share my learnings from building this service in go. In this small series of blog posts we are going to build a small Graphql api that talks to a postgres database. Our api will be able to store cats and their owners. I didn't really know what this API should actually do so I decided to go with cats... Since you can't go wrong with cats!
+So I thought I would share my learnings from building this service in go. In this small series of blog posts, we are going to build a small Graphql API that talks to a PostgreSQL database. Our API will be able to store cats and their owners. I didn't really know what this API should actually do so I decided to go with cats... Since you can't go wrong with cats!
 
-So let's get started shall we. I will not be going over on setting up you're go development environment but I will link a good recource for doing that. ![preparing your envionment for go development](https://www.gopherguides.com/courses/preparing-your-environment-for-go-development/modules/setting-up-mac-linux/)
+So let's get started, shall we? I will not be going over on setting up your go development environment but I will link a good resource for doing that. [preparing your environment for go development](https://www.gopherguides.com/courses/preparing-your-environment-for-go-development/modules/setting-up-mac-linux/)
 
-First lets create a new folder and initialize the project
+First, let's create a new folder and initialize the project
 
 ```
 mkdir go-ms-1 && cd go-ms-1 && go mod init <path to this folder from your $GOROOT>
 ```
 
-There is a convention in the go community to store projects under the same sructure as in your external source code provider. So for example for me the **_go mod init_** command looks like this.
+There is a convention in the go community to store projects under the same structure as in your external source code provider. So for example for me, the **_go mod init_** command looks like this.
 
 ```
 go mod init github.com/japiirainen/go-ms-1
@@ -22,25 +33,25 @@ go mod init github.com/japiirainen/go-ms-1
 
 ## A quick word on gqlcen
 
-gql gen is a Graphql implementation for go that takes a schema first approach so you should be quite familiar if you have used apollo-server before. As I was doing research about other Graphql implementations in go I noticed that the most options take a code first approach. I quite like the schema first approach so I decided to go with gqlgen.
+Gqlgen is a Graphql implementation for go that takes a schema first approach so you should be quite familiar if you have used apollo-server before. As I was doing research about other Graphql implementations in go I noticed that most options take a code-first approach. I quite like the schema first approach so I decided to go with gqlgen.
 
-After that we can bootstrap our gqlgen project using the following commands.
+After that, we can bootstrap our gqlgen project using the following commands.
 
-Actually let's first download the package!
+Actually, let's first download the package!
 
 ```
 go get github.com/99designs/gqlgen
 ```
 
-The we can bootstrap the project.
+Then we can bootstrap the project.
 
 ```
 go run github.com/99designs/gqlgen init
 ```
 
-This will generate quite a few files for you. Don't worry, we will go through all of these. But first lets write some code. The very first thing we should do is write our schema for the Graphql API. I said it's schema first afterall...
+This will generate quite a few files for you. Don't worry, we will go through all of these. But first, let's write some code. The very first thing we should do is write our schema for the Graphql API. I said it's schema first after all...
 
-I like to brake the schema into multiple clearly named files and not just stick everything into a single schema.graphql file. So lets do that. Go into the graph directory and create a folder called schema. This is where we will place all of our **_.graphql_** files.
+I like to break the schema into multiple clearly named files and not just stick everything into a single schema.graphql file. So let's do that. Go into the graph directory and create a folder called schema. This is where we will place all of our **_.graphql_** files.
 
 Our schema folder structure will look like this.
 
@@ -173,13 +184,13 @@ models:
 omit_slice_element_pointers: true
 ```
 
-Next you should add this line to your **_resolver.go_** file.
+Next, you should add this line to your **_resolver.go_** file.
 
 ```
 //go:generate go run github.com/99designs/gqlgen
 ```
 
-I also like to use a Makefile to not have to remember all the commands im running frequently. So lets do that.
+I also like to use a Makefile to not have to remember all the commands I'm running frequently. So let's do that.
 
 **_Makefile_**
 
@@ -192,7 +203,7 @@ gen:
 
 Now you should be able to run **_make gen_** and gqlgen will generate resolvers and structs for you based on our schema.
 
-So I like to modify the file structure slightly from the default that gqlgen gives you. You dont need to copy mine if you dont want to, but i'll show it show you can copy if that's somemthing you would like to do.
+So I like to modify the file structure slightly from the default that gqlgen gives you. You don't need to copy mine if you don't want to, but I'll show it show you can copy if that's something you would like to do.
 
 **_My filestructure_**
 
@@ -210,8 +221,8 @@ So I like to modify the file structure slightly from the default that gqlgen giv
 │   ├── schema
 ```
 
-This blog post is already getting lengthy and we haven't done anything very interesting but I guess thats how it is at the start of projects.
-Let's atleast get a simple resolver working before ending this part 1 of the project.
+This blog post is already getting lengthy and we haven't done anything very interesting but I guess that's how it is at the start of projects.
+Let's at least get a simple resolver working before ending this part 1 of the project.
 
 **_graphql/resolvers/owner.resolvers.go_**
 
@@ -252,9 +263,9 @@ Now if we start the app by running **_go run --race server.g_** and navigating t
 }
 ```
 
-In the next part we will get to some more interesting things like actually storing data in postgres and hooking that up to our graphql resolvers.
-Hope this series helps you on getting starter with go and graphql.
+In the next part, we will get to some more interesting things like actually storing data in Postgres and hooking that up to our graphql resolvers.
+Hope this series helps you on getting started with go and graphql.
 
-Links to the ![source code](https://github.com/japiirainen/go-ms-1)source code
+Links to the [source code](https://github.com/japiirainen/go-ms-1)source code
 
-My website for more posts by ![yours truly](https://japiirainen.com)
+My website for more posts by [yours truly](https://japiirainen.com)
