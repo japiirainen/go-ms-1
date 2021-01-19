@@ -22,10 +22,12 @@ func main() {
 	}
 
 	err := godotenv.Load(".env")
+	dbURL := os.Getenv("DATABASE_URL")
 	if err != nil {
 		log.Fatal("failed to lead env")
 	}
 	c := db.Connect(os.Getenv("DATABASE_URL"))
+	db.MigrateUp(dbURL)
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.Resolver{
 		Conn: c,

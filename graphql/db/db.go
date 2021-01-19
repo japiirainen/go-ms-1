@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -21,4 +22,12 @@ func Connect(dbURL string) *DB {
 	return &DB{
 		conn: conn,
 	}
+}
+
+//MigrateUp runs migrations
+func MigrateUp(dbURL string) {
+	m, _ := migrate.New(
+		"file://db/migrations",
+		dbURL)
+	m.Up()
 }
