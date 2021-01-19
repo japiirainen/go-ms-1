@@ -1,11 +1,16 @@
 package resolvers
 
-import "github.com/japiirainen/go-ms-1/graphql/generated"
+import (
+	"github.com/japiirainen/go-ms-1/graphql/db"
+	"github.com/japiirainen/go-ms-1/graphql/generated"
+)
 
 //go:generate go run github.com/99designs/gqlgen
 
 // Resolver is main resolver
-type Resolver struct{}
+type Resolver struct {
+	Conn *db.DB
+}
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
