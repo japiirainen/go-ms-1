@@ -9,10 +9,12 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
+// DB is a struct holding a postgres connection
 type DB struct {
 	conn *pgx.Conn
 }
 
+// Connect returns the database connection
 func Connect(dbURL string) *DB {
 	conn, err := pgx.Connect(context.Background(), dbURL)
 	if err != nil {
